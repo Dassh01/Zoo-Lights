@@ -1,29 +1,37 @@
 package ZooLights.Helpers;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.function.Function;
 import ZooLights.Objects.Date;
 
 public class Util {
+    //TODO: Documentation
+    public static boolean isWeekend(int day, int month, int year) {
+        LocalDate date = LocalDate.of(year, month, day);
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+    }
 
-    protected static Date formatCurrentDate(int currentDateAsLong) {
-        String dateAsString = Integer.toString(currentDateAsLong);
+    public static Date getCurrentDate() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMddyyyy");
+        LocalDateTime ldt = LocalDateTime.now();
+        int dateAsNum = Integer.parseInt(dtf.format(ldt));
+        String dateAsString = Integer.toString(dateAsNum);
+        return strToDate(dateAsString); //Conversion is performed inline here
+    }
+
+    protected static Date strToDate(String dateAsString) {
         String month = dateAsString.substring(0,2);
         String day = dateAsString.substring(2,4);
         String year = dateAsString.substring(4,8);
         return new Date(Integer.parseInt(month), Integer.parseInt(day), Integer.parseInt(year));
     }
-    private static int[] parseIntToArray(int number) {
-        String numberStr = Integer.toString(number);
-        int[] result = new int[numberStr.length()];
 
-        for (int i = 0; i < numberStr.length(); i++) {
-            result[i] = Character.getNumericValue(numberStr.charAt(i));
-        }
-
-        return result;
-    }
     /**
      * Comes from retyping user prompts and scanner methods over and over in APCSA projects :C
      * Used to simplify above-mentioned process, does the prompt and scan all in one (now with an embedded try catch!) (InputMismatch be gone!)
