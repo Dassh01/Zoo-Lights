@@ -12,6 +12,10 @@ public class Date {
         this.year = year;
     }
 
+    public String getDateAsString() {
+        return "Date: " + month + "/" + day + "/" + year;
+    }
+
     public int getMonth() {
         return month;
     }

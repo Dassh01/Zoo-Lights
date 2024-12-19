@@ -11,25 +11,32 @@ public class Party {
     private final int guestsInParty;
     private final modeOfTransport transportMode;
     private final boolean isWeekend;
+    private final String partyName;
+    private final int partyID;
 
-    public Party(int guestsInParty, modeOfTransport transportMode, Date currentDate) {
-        this.guestsInParty = guestsInParty;
+    public Party(int guestsInParty, modeOfTransport transportMode, Date currentDate, String partyName, int partyID) {
+        this.guestsInParty = guestsInParty; //AMOUNT of guests in party
         this.transportMode = transportMode;
         this.today = currentDate;
-        this.isWeekend = isWeekend(today.getDay(),today.getMonth(),today.getYear());
+        this.isWeekend = isWeekend(today);
+        this.partyName = partyName;
+        this.partyID = partyID;
     }
 
     public void addGuest(Guest guest) {
         guestList.add(guest);
     }
 
+    public String getPartyName() {
+        return partyName;
+    }
     public int getPartyCost() {
         int cost = 0;
-        if (transportMode == modeOfTransport.DRIVING) {
+        if (transportMode == modeOfTransport.DRIVING) { //If the party is driving
             //If the number of people in the party is over 8, the per-person cost goes down to 12.
             cost = guestsInParty > 8 ? (65 + (12 * (guestsInParty - 8))) : 65;
         }
-        else if (transportMode == modeOfTransport.WALKING) {
+        else if (transportMode == modeOfTransport.WALKING) { //If the party is walking
             for (Guest guest : guestList) {
                 if (guest.getAge() > 18) { //Charge as an adult
                     cost = isWeekend ? cost + 25 : cost + 16;
@@ -46,5 +53,15 @@ public class Party {
             //TODO: Ask Smith what costs for train are...
         }
         return cost;
+    }
+
+    public void displayGuestsInParty() {
+        int i = 0;
+        for (Guest guest : guestList) {
+            ++i;
+            System.out.println("Info of guest " + i +
+                    "\n Guest name " + guest.getName() +
+                    "\n Guest age: " + guest.getAge() );
+        }
     }
 }

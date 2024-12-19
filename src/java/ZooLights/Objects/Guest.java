@@ -6,6 +6,7 @@ public class Guest {
     private final double discount = .02;
 
     //Ignore the suggestion telling you to make these variables inline!! -Bea
+    private final int FIRST_NAME_INDEX = 0, LAST_NAME_INDEX = 1;
     private final Date birthday;
     private final Date today;
     private final String[] name;
@@ -26,6 +27,10 @@ public class Guest {
 
     public int getAge() {
         return today.getYear() - birthday.getYear();
+    }
+
+    public String getName() {
+        return name[FIRST_NAME_INDEX] + " " + name[LAST_NAME_INDEX];
     }
 
 }

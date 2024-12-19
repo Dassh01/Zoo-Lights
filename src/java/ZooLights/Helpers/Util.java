@@ -4,16 +4,42 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.function.Function;
+
+import ZooLights.Main;
 import ZooLights.Objects.Date;
+import ZooLights.Objects.Party;
 
 public class Util {
+    public static void arraylistToStr (ArrayList<Party> arrayList) {
+        if (arrayList.isEmpty()) {
+            System.out.println("No parties generated yet!");
+        }
+        for (Party party : arrayList) {
+            System.out.println(party.getPartyName());
+        }
+    }
+
+    public static modeOfTransport strToMode(String input) {
+        input = input.toLowerCase().trim();
+        return switch (input) {
+            case "driving" -> modeOfTransport.DRIVING;
+            case "train" -> modeOfTransport.TRAIN;
+            case "walking" -> modeOfTransport.WALKING;
+            default -> throw new IllegalArgumentException("""
+                    Input should look like "driving", "train" or "walking"
+                    (it isn't case sensitive or whitespace reliant!!)
+                    """);
+        };
+    }
     //TODO: Documentation
-    public static boolean isWeekend(int day, int month, int year) {
-        LocalDate date = LocalDate.of(year, month, day);
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
+    public static boolean isWeekend(Date date) {
+        final int year = date.getYear(), month = date.getMonth(), day = date.getDay();
+        LocalDate localDate = LocalDate.of(year, month, day);
+        DayOfWeek dayOfWeek = localDate.getDayOfWeek();
         return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 
@@ -26,9 +52,13 @@ public class Util {
     }
 
     protected static Date strToDate(String dateAsString) {
+        dateAsString = dateAsString.replaceAll("/","");
         String month = dateAsString.substring(0,2);
         String day = dateAsString.substring(2,4);
         String year = dateAsString.substring(4,8);
+        if (Main.debug) {
+            System.out.println("Sending back date with month = " + month + ", day = " + day + ", year = " + year);
+        }
         return new Date(Integer.parseInt(month), Integer.parseInt(day), Integer.parseInt(year));
     }
 
