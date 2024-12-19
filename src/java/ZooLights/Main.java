@@ -32,49 +32,60 @@ public class Main extends Util {
 
         int height = 0;
         int weight = 0;
+        boolean isRidingTrain = false;
+        if (transportMode == modeOfTransport.WALKING) { //If the guest is walking then they COULD be going on the train
+            if (userInputBoolean(askForThing("Is this guest taking the train? (Y/N): ", Scanner::nextLine, scanner))) {
+                height = askForThing("[TRAIN] Enter guest height (Inches): ", Scanner::nextInt, scanner);
+                weight = askForThing("[TRAIN] Enter guest weight (Pounds): ", Scanner::nextInt, scanner);
 
-        if (transportMode == modeOfTransport.TRAIN) {
-            height = askForThing("[TRAIN] Enter guest height: ", Scanner::nextInt, scanner);
-            weight = askForThing("[TRAIN] Enter guest weight: ", Scanner::nextInt, scanner);
+                if (weight < 300 && height > 48) {
+                    System.out.println("This guest passes the height and weight requirements");
+                    isRidingTrain = true;
+
+                } else {
+                    System.out.println("This guest DOES NOT pass the height and weight requirements");
+                }
+            }
         }
-
-        boolean hasDiscount = askForThing("Enter discount code from guest: ", Scanner::nextLine, scanner).equals("MEMBER");
 
         Date birthday = strToDate(askForThing("Enter Birthday (mm/dd/yyyy): ", Scanner::nextLine, scanner));
 
-        return new Guest(birthday, name, transportMode, hasDiscount, height, weight, today);
+        return new Guest(birthday, name, isRidingTrain, height, weight, today);
     }
 
-    public static Party generateParty(Scanner scanner, Date currentDate) {
-        //TODO: Implement guest - party system
-        int amountOfPeopleInParty = askForThing("How many people are in the party?: ",Scanner::nextInt,scanner);
-        String partyName = askForThing("Assign a name to this party: ",Scanner::nextLine,scanner);
+    public static Party generateParty (Scanner scanner, Date currentDate){
+        int amountOfPeopleInParty = askForThing("How many people are in the party?: ", Scanner::nextInt, scanner);
+        String partyName = askForThing("Assign a name to this party: ", Scanner::nextLine, scanner);
 
         modeOfTransport transportMode;
         String transportModeInputString = askForThing("""
-               What mode of transportation is the party taking? "\
-               Options - (Driving, Train, Walking): \s""",Scanner::nextLine,scanner);
+                    What mode of transportation is the party taking? "\
+                    Options - (Driving, Train, Walking): \s""", Scanner::nextLine, scanner);
+
         transportMode = strToMode(transportModeInputString);
+        boolean hasDiscount = askForThing("Enter discount code from party: ", Scanner::nextLine, scanner).equalsIgnoreCase("MEMBER");
+        Date dateOfAttendance = strToDate(askForThing("What date does the party want to attend? (mm/dd/yyyy): ", Scanner::nextLine, scanner));
 
-        Party party = new Party(amountOfPeopleInParty,transportMode,currentDate,partyName, 1);
+        Party party = new Party(amountOfPeopleInParty, transportMode, currentDate, dateOfAttendance, partyName, hasDiscount, 1);
 
-        for (int i = 1; i < amountOfPeopleInParty+1; ++i) {
-            party.addGuest(generateGuest(scanner,i,currentDate,transportMode));
+        for (int i = 1; i < amountOfPeopleInParty + 1; ++i) {
+            party.addGuest(generateGuest(scanner, i, currentDate, transportMode));
         }
 
         return party;
     }
 
-    public static void runTUI(Scanner scanner, Date currentDate, ArrayList<Party> parties, ArrayList<Ticket> tickets) {
+    public static void runTUI (Scanner scanner, Date
+            currentDate, ArrayList < Party > parties, ArrayList < Ticket > tickets){
         String command;
         boolean running = true;
-        String help = "Commands: generateparty, listparties, cmds, end, currentdate";
-        while(running) {
-            command = askForThing("> ",Scanner::nextLine,scanner);
+        String help = "Commands: generateparty, listparties, cmds, end, currentdate, debug";
+        while (running) {
+            command = askForThing("> ", Scanner::nextLine, scanner, true);
 
-            switch (command.toLowerCase().trim()) {
+            switch (command.toLowerCase().replaceAll(" ", "")) {
                 case ("generateparty"):
-                    parties.add(generateParty(scanner,currentDate));
+                    parties.add(generateParty(scanner, currentDate));
                     break;
 
                 case ("listparties"):
@@ -83,6 +94,7 @@ public class Main extends Util {
 
                 case ("help"):
                 case ("cmds"):
+                case ("cmd"):
                     System.out.println(help);
                     break;
 
@@ -91,28 +103,34 @@ public class Main extends Util {
                     break;
 
                 case ("debug"):
-                    debug = true;
+                    debug = !debug;
+                    System.out.println("Debug: (" + !debug + ")" + " -> " + "(" + debug + ")");
                     break;
 
                 case ("currentdate"):
                     System.out.println(currentDate.getDateAsString());
                     break;
+                case ("version"):
+                    System.out.println(Util.dasshTag);
+                    break;
+                default:
+                    System.out.println("Command not recognized");
             }
 
         }
     }
-    public static void main(String[] args) {
+    public static void main (String[]args) {
         Scanner scanner = new Scanner(System.in);
         Date currentDate = getCurrentDate();
         ArrayList<Party> parties = new ArrayList<>();
         ArrayList<Ticket> tickets = new ArrayList<>();
 
         System.out.println("""
-        ---------------------------------------------------\
-        | Welcome to the ZooLights ticket maker terminal! |\
-        ---------------------------------------------------\
-        """);
+                    ---------------------------------------------------\
+                    | Welcome to the ZooLights ticket maker terminal! |\
+                    ---------------------------------------------------\
+                    """);
 
-        runTUI(scanner,currentDate, parties, tickets);
+        runTUI(scanner, currentDate, parties, tickets);
     }
 }

@@ -6,21 +6,28 @@ import static ZooLights.Helpers.Util.isWeekend;
 import java.util.ArrayList;
 
 public class Party {
-    ArrayList<Guest> guestList = new ArrayList<>();
-    Date today;
+    private ArrayList<Guest> guestList = new ArrayList<>();
+    private Date today;
+    private Date dateOfAttendance;
+    private final double discount = .02;
+    private final boolean hasDiscount;
     private final int guestsInParty;
     private final modeOfTransport transportMode;
     private final boolean isWeekend;
     private final String partyName;
     private final int partyID;
 
-    public Party(int guestsInParty, modeOfTransport transportMode, Date currentDate, String partyName, int partyID) {
+    public Party(int guestsInParty, modeOfTransport transportMode,
+                 Date currentDate, Date dateOfAttendance,
+                 String partyName, boolean hasDiscount, int partyID) {
         this.guestsInParty = guestsInParty; //AMOUNT of guests in party
         this.transportMode = transportMode;
         this.today = currentDate;
         this.isWeekend = isWeekend(today);
         this.partyName = partyName;
         this.partyID = partyID;
+        this.hasDiscount = hasDiscount;
+        this.dateOfAttendance = dateOfAttendance;
     }
 
     public void addGuest(Guest guest) {
@@ -30,8 +37,8 @@ public class Party {
     public String getPartyName() {
         return partyName;
     }
-    public int getPartyCost() {
-        int cost = 0;
+    public double getPartyCost() {
+        double cost = 0;
         if (transportMode == modeOfTransport.DRIVING) { //If the party is driving
             //If the number of people in the party is over 8, the per-person cost goes down to 12.
             cost = guestsInParty > 8 ? (65 + (12 * (guestsInParty - 8))) : 65;
@@ -49,9 +56,8 @@ public class Party {
                 }
             }
         }
-        else if (transportMode == modeOfTransport.TRAIN) {
-            //TODO: Ask Smith what costs for train are...
-        }
+
+        cost = hasDiscount ? cost * discount : cost;
         return cost;
     }
 

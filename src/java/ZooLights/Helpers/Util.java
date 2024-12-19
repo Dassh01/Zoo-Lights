@@ -14,6 +14,15 @@ import ZooLights.Objects.Date;
 import ZooLights.Objects.Party;
 
 public class Util {
+    public static final String dasshTag = """
+            //======================================\\\\
+            ||  ____                _      ___  _   ||
+            || |  _ \\  __ _ ___ ___| |__  / _ \\/ |  ||
+            || | | | |/ _` / __/ __| '_ \\| | | | |  ||
+            || | |_| | (_| \\__ \\__ \\ | | | |_| | |  ||
+            || |____/ \\__,_|___/___/_| |_|\\___/|_|  ||
+            \\\\======================================//
+            """;
     public static void arraylistToStr (ArrayList<Party> arrayList) {
         if (arrayList.isEmpty()) {
             System.out.println("No parties generated yet!");
@@ -27,7 +36,6 @@ public class Util {
         input = input.toLowerCase().trim();
         return switch (input) {
             case "driving" -> modeOfTransport.DRIVING;
-            case "train" -> modeOfTransport.TRAIN;
             case "walking" -> modeOfTransport.WALKING;
             default -> throw new IllegalArgumentException("""
                     Input should look like "driving", "train" or "walking"
@@ -53,6 +61,7 @@ public class Util {
 
     protected static Date strToDate(String dateAsString) {
         dateAsString = dateAsString.replaceAll("/","");
+
         String month = dateAsString.substring(0,2);
         String day = dateAsString.substring(2,4);
         String year = dateAsString.substring(4,8);
@@ -89,6 +98,29 @@ public class Util {
         return returningInformation;
     }
 
+    protected static <T> T askForThing(String askText, Function<Scanner, T> inputFunction, Scanner scanner, boolean noNewline) {
+        if (noNewline) {
+            System.out.print(askText);
+        }
+        else {
+            System.out.println(askText);
+        }
+        T returningInformation;
+        while (true) {
+            try {
+                returningInformation = inputFunction.apply(scanner);
+                if (returningInformation instanceof Integer) {
+                    scanner.nextLine();
+                }
+            } catch (Exception e) {
+                scanner.nextLine();
+                System.out.println(askText);
+                continue;
+            }
+            break;
+        }
+        return returningInformation;
+    }
     /**
      * Interprets a string into a boolean. Worked with a (yes/no) or a (y/n) prompt, case-insensitive
      * @param userInput [String] Raw user input as answer to a prompt similar to the ones listed above
