@@ -23,6 +23,4 @@ public static boolean isWeekend(Date date) {
     }
 ```
 
-Gang lets get this one finished [^1]
-
-[^1]: Footer test
+Gang lets get this one finished :sob:
