@@ -1,6 +1,5 @@
 ## ZooLights
-
-###Beatrice, Jack, Henry, Luke
+Beatrice, Jack, Henry, Luke
 
 This is a project designed to register customers for ZooLights into a party and calculate the costs for the trip depending on numerous different inputs
 
