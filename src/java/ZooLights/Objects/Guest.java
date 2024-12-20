@@ -10,10 +10,10 @@ public class Guest {
     private final Date today;
     private final String[] name;
     private final boolean isRidingTrain;
-    private final int height;
-    private final int weight;
+    private final double height;
+    private final double weight;
 
-    public Guest(Date birthday, String[] name, boolean isRidingTrain, int height, int weight, Date today) {
+    public Guest(Date birthday, String[] name, boolean isRidingTrain, double height, double weight, Date today) {
         this.birthday = birthday;
         this.name = name;
         this.isRidingTrain = isRidingTrain;

@@ -1,5 +1,6 @@
 package ZooLights;
 
+import ZooLights.Helpers.AnsiEscapeCodes;
 import ZooLights.Helpers.Util;
 import ZooLights.Helpers.modeOfTransport;
 import ZooLights.Objects.Date;
@@ -30,16 +31,17 @@ public class Main extends Util {
         name[0] = askForThing("Enter guest " + guestIteration + "'s" + " first name: ", Scanner::nextLine, scanner);
         name[1] = askForThing("Enter guest " + guestIteration + "'s" + " last name: ", Scanner::nextLine, scanner);
 
-        int height = 0;
-        int weight = 0;
+        double height = 0;
+        double weight = 0;
         boolean isRidingTrain = false;
         if (transportMode == modeOfTransport.WALKING) { //If the guest is walking then they COULD be going on the train
             if (userInputBoolean(askForThing("Is this guest taking the train? (Y/N): ", Scanner::nextLine, scanner))) {
-                height = askForThing("[TRAIN] Enter guest height (Inches): ", Scanner::nextInt, scanner);
-                weight = askForThing("[TRAIN] Enter guest weight (Pounds): ", Scanner::nextInt, scanner);
+                //prompts weight and height because every
+                height = askForThing("[TRAIN] Enter guest height (Inches): ", Scanner::nextDouble, scanner);
+                weight = askForThing("[TRAIN] Enter guest weight (Pounds): ", Scanner::nextDouble, scanner);
 
                 if (weight < 300 && height > 48) {
-                    System.out.println("This guest passes the height and weight requirements");
+                    System.out.println(AnsiEscapeCodes.FG_RED + AnsiEscapeCodes.BG_BRIGHT_RED + "This guest passes the height and weight requirements" + AnsiEscapeCodes.RESET);
                     isRidingTrain = true;
 
                 } else {
@@ -56,18 +58,20 @@ public class Main extends Util {
     public static Party generateParty (Scanner scanner, Date currentDate){
         int amountOfPeopleInParty = askForThing("How many people are in the party?: ", Scanner::nextInt, scanner);
         String partyName = askForThing("Assign a name to this party: ", Scanner::nextLine, scanner);
-
+        /* Prompts user for the transportation method
+        There are two options, driving and walking */
         modeOfTransport transportMode;
         String transportModeInputString = askForThing("""
                     What mode of transportation is the party taking? "\
-                    Options - (Driving, Train, Walking): \s""", Scanner::nextLine, scanner);
+                    Options - (Driving, Walking): \s""", Scanner::nextLine, scanner);
 
         transportMode = strToMode(transportModeInputString);
+        //prompts and checks if the user inputs the correct discount code "MEMBER"
         boolean hasDiscount = askForThing("Enter discount code from party: ", Scanner::nextLine, scanner).equalsIgnoreCase("MEMBER");
         Date dateOfAttendance = strToDate(askForThing("What date does the party want to attend? (mm/dd/yyyy): ", Scanner::nextLine, scanner));
 
         Party party = new Party(amountOfPeopleInParty, transportMode, currentDate, dateOfAttendance, partyName, hasDiscount, 1);
-
+        //creates a new party member for the amount that was input
         for (int i = 1; i < amountOfPeopleInParty + 1; ++i) {
             party.addGuest(generateGuest(scanner, i, currentDate, transportMode));
         }
@@ -77,12 +81,15 @@ public class Main extends Util {
 
     public static void runTUI (Scanner scanner, Date
             currentDate, ArrayList < Party > parties, ArrayList < Ticket > tickets){
+        //initializing variables used in the interface
         String command;
         boolean running = true;
-        String help = "Commands: generateparty, listparties, cmds, end, currentdate, debug";
+        String help = ("Commands: " + AnsiEscapeCodes.FG_CYAN +  " generateparty, listparties, cmds, end, currentdate, debug" + AnsiEscapeCodes.RESET);
         while (running) {
             command = askForThing("> ", Scanner::nextLine, scanner, true);
 
+            /* console commands by using a switch case
+            If it matches the string in the case it is a valid command, and it will run the code */
             switch (command.toLowerCase().replaceAll(" ", "")) {
                 case ("generateparty"):
                     parties.add(generateParty(scanner, currentDate));
@@ -113,12 +120,19 @@ public class Main extends Util {
                 case ("version"):
                     System.out.println(Util.dasshTag);
                     break;
+                case ("lookatparty"):
+                    String partyToLookAt = askForThing("Lookat which party?: ",Scanner::nextLine,scanner);
+                    // does something helpful totally i promise -jack
                 default:
                     System.out.println("Command not recognized");
             }
 
         }
     }
+
+    //TODO: Seperate useful and "redundant" comments
+    //TODO: Leave formatting to Jack & Henry?
+    //starting the system up
     public static void main (String[]args) {
         Scanner scanner = new Scanner(System.in);
         Date currentDate = getCurrentDate();
@@ -130,7 +144,7 @@ public class Main extends Util {
                     | Welcome to the ZooLights ticket maker terminal! |\
                     ---------------------------------------------------\
                     """);
-
+        //runs the terminal user interface
         runTUI(scanner, currentDate, parties, tickets);
     }
 }
