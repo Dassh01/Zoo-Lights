@@ -1,12 +1,9 @@
 package ZooLights;
 
 import ZooLights.Helpers.AnsiEscapeCodes;
-import ZooLights.Helpers.Util;
+import ZooLights.Helpers.Utils;
 import ZooLights.Helpers.modeOfTransport;
-import ZooLights.Objects.Date;
-import ZooLights.Objects.Guest;
-import ZooLights.Objects.Party;
-import ZooLights.Objects.Ticket;
+import ZooLights.Objects.*;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,7 +14,7 @@ Date: 12/17/24
 Assignment: Zoo Lights Ticket Generator
  */
 
-public class Main extends Util {
+public class Main extends Utils {
 
     public static boolean debug;
 
@@ -41,11 +38,11 @@ public class Main extends Util {
                 weight = askForThing("[TRAIN] Enter guest weight (Pounds): ", Scanner::nextDouble, scanner);
 
                 if (weight < 300 && height > 48) {
-                    System.out.println(AnsiEscapeCodes.FG_RED + AnsiEscapeCodes.BG_BRIGHT_RED + "This guest passes the height and weight requirements" + AnsiEscapeCodes.RESET);
+                    if (debug) { System.out.println(AnsiEscapeCodes.FG_RED + AnsiEscapeCodes.BG_BRIGHT_RED + "This guest passes the height and weight requirements" + AnsiEscapeCodes.RESET); }
                     isRidingTrain = true;
 
                 } else {
-                    System.out.println("This guest DOES NOT pass the height and weight requirements");
+                    if (debug) { System.out.println("This guest DOES NOT pass the height and weight requirements"); }
                 }
             }
         }
@@ -80,29 +77,34 @@ public class Main extends Util {
     }
 
     public static void runTUI (Scanner scanner, Date
-            currentDate, ArrayList < Party > parties, ArrayList < Ticket > tickets){
+            currentDate, ArrayList < Party > parties, ArrayList < TicketGroup > tickets){
         //initializing variables used in the interface
         String command;
         boolean running = true;
-        String help = ("Commands: " + AnsiEscapeCodes.FG_CYAN +  " generateparty, listparties, cmds, end, currentdate, debug" + AnsiEscapeCodes.RESET);
         while (running) {
             command = askForThing("> ", Scanner::nextLine, scanner, true);
 
             /* console commands by using a switch case
             If it matches the string in the case it is a valid command, and it will run the code */
-            switch (command.toLowerCase().replaceAll(" ", "")) {
+            switch (sanitize(command)) {
                 case ("generateparty"):
                     parties.add(generateParty(scanner, currentDate));
                     break;
 
                 case ("listparties"):
-                    arraylistToStr(parties);
+                case ("ls:p"):
+                    displayParties(parties);
                     break;
 
                 case ("help"):
                 case ("cmds"):
-                case ("cmd"):
-                    System.out.println(help);
+                    System.out.print("""
+                        ------------------------- Commands -------------------------
+                        Functions: Generate party, End, Compile Ticket Group
+                        Viewing: List parties, Lookat : party, Lookat : ticketindex, ls
+                        Debug: debug, Current date, gendefaultparty
+                        Misc: Cmds/Help, Version
+                        """ );
                     break;
 
                 case ("end"):
@@ -118,11 +120,66 @@ public class Main extends Util {
                     System.out.println(currentDate.getDateAsString());
                     break;
                 case ("version"):
-                    System.out.println(Util.dasshTag);
+                case ("ver"):
+                    System.out.println(Utils.dasshTag);
                     break;
-                case ("lookatparty"):
-                    String partyToLookAt = askForThing("Lookat which party?: ",Scanner::nextLine,scanner);
-                    // does something helpful totally i promise -jack
+
+                case ("lookat:party"):
+                    boolean partyFound_lookat = false;
+                    String partyToLookAtCMD = askForThing("Look at which party?: ",Scanner::nextLine,scanner);
+                    for (Party party : parties) {
+                        if (sanitize(party.getPartyName()).equalsIgnoreCase(sanitize(partyToLookAtCMD))) {
+                            party.displayGuestsInParty();
+                            partyFound_lookat = true;
+                        }
+                    }
+                    if (!partyFound_lookat) {
+                        System.out.println("No party with that name was found");
+                    }
+                    break;
+
+                case ("generatedefaultparty"):
+                case ("gendefaultparty"):
+                case ("gdp"):
+                    if (debug) {
+                        parties.add(getDefaultParty()); //For testing!
+                    }
+                    else {
+                        System.out.println("Please enable debug mode to access this function");
+                    }
+                    break;
+
+                case ("compileticketgroup"):
+                case ("ctg"):
+                    boolean partyFound_compiletix = false;
+                    String partyToCompileCMD = askForThing("Compile which party?: ",Scanner::nextLine,scanner);
+                    for (Party party : parties) {
+                        if (party.getPartyName().equalsIgnoreCase(partyToCompileCMD) && !party.compiled) {
+                            if (debug) {
+                                System.out.println("Matched party!..");
+                            }
+                            TicketGroup ticketGroup = new TicketGroup(party);
+                            tickets.add(ticketGroup);
+                            if (debug) {
+                                System.out.println("Ticket group compiled and appended to tickets.");
+                            }
+                            partyFound_compiletix = true;
+                            party.compiled = true;
+                        }
+                    }
+                    if (!partyFound_compiletix) {
+                        System.out.println("No party to compile was found");
+                    }
+                    break;
+
+                case ("lookat:ticketindex"):
+                case ("ls:t"):
+                    displayTicketGroups(tickets);
+                    break;
+                case("ls"):
+                    displayParties(parties);
+                    displayTicketGroups(tickets);
+                    break;
                 default:
                     System.out.println("Command not recognized");
             }
@@ -137,7 +194,7 @@ public class Main extends Util {
         Scanner scanner = new Scanner(System.in);
         Date currentDate = getCurrentDate();
         ArrayList<Party> parties = new ArrayList<>();
-        ArrayList<Ticket> tickets = new ArrayList<>();
+        ArrayList<TicketGroup> ticketGroups = new ArrayList<>();
 
         System.out.println("""
                     ---------------------------------------------------\
@@ -145,6 +202,6 @@ public class Main extends Util {
                     ---------------------------------------------------\
                     """);
         //runs the terminal user interface
-        runTUI(scanner, currentDate, parties, tickets);
+        runTUI(scanner, currentDate, parties, ticketGroups);
     }
 }

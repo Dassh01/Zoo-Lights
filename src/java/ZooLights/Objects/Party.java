@@ -1,12 +1,12 @@
 package ZooLights.Objects;
 
 import ZooLights.Helpers.modeOfTransport;
-import static ZooLights.Helpers.Util.isWeekend;
+import static ZooLights.Helpers.Utils.isWeekend;
 
 import java.util.ArrayList;
 
 public class Party {
-    private ArrayList<Guest> guestList = new ArrayList<>();
+    public ArrayList<Guest> guestList = new ArrayList<>();
     private Date today;
     private Date dateOfAttendance;
     private final double discount = .02;
@@ -16,6 +16,7 @@ public class Party {
     private final boolean isWeekend;
     private final String partyName;
     private final int partyID;
+    public boolean compiled = false;
 
     public Party(int guestsInParty, modeOfTransport transportMode,
                  Date currentDate, Date dateOfAttendance,
@@ -30,6 +31,9 @@ public class Party {
         this.dateOfAttendance = dateOfAttendance;
     }
 
+    public modeOfTransport getTransportMode() {
+        return transportMode;
+    }
     public void addGuest(Guest guest) {
         guestList.add(guest);
     }
@@ -37,8 +41,11 @@ public class Party {
     public String getPartyName() {
         return partyName;
     }
+
+    //TODO: Done??
     public double getPartyCost() {
         double cost = 0;
+
         if (transportMode == modeOfTransport.DRIVING) { //If the party is driving
             //If the number of people in the party is over 8, the per-person cost goes down to 12.
             cost = guestsInParty > 8 ? (65 + (12 * (guestsInParty - 8))) : 65;
@@ -62,12 +69,21 @@ public class Party {
     }
 
     public void displayGuestsInParty() {
+        if (guestList.isEmpty()) {
+            System.out.println("Party has no guests!");
+            return;
+        }
+        System.out.println();
         int i = 0;
         for (Guest guest : guestList) {
             ++i;
+            Date guestBirthday = guest.getBirthday();
             System.out.println("Info of guest " + i +
                     "\n Guest name " + guest.getName() +
-                    "\n Guest age: " + guest.getAge() );
+                    "\n Guest age: " + guest.getAge() +
+                    "\n Guest birthday (mm/dd/yyyy): " + guestBirthday.getMonth() + "\\" + guestBirthday.getDay() + "\\" + guestBirthday.getYear() +
+                    "\n Guest physique: Height = " + guest.getHeight() + "\" Weight = " + guest.getWeight() + " lbs" +
+                    "\n Guest riding train = " + guest.isRidingTrain() + "\n");
         }
     }
 }

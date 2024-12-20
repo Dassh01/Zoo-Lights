@@ -11,10 +11,14 @@ import java.util.function.Function;
 
 import ZooLights.Main;
 import ZooLights.Objects.Date;
+import ZooLights.Objects.Guest;
 import ZooLights.Objects.Party;
+import ZooLights.Objects.TicketGroup;
 
-public class Util {
+public class Utils {
+
     public static final String dasshTag = """
+            VERSION B.
             //======================================\\\\
             ||  ____                _      ___  _   ||
             || |  _ \\  __ _ ___ ___| |__  / _ \\/ |  ||
@@ -22,14 +26,64 @@ public class Util {
             || | |_| | (_| \\__ \\__ \\ | | | |_| | |  ||
             || |____/ \\__,_|___/___/_| |_|\\___/|_|  ||
             \\\\======================================//
+            AUTHORS: 
+            https://github.com/Dassh01 : https://github.com/J-moneyKR : https://github.com/Henwy-Hi : https://github.com/Lukewtye
             """;
-    public static void arraylistToStr (ArrayList<Party> arrayList) {
-        if (arrayList.isEmpty()) {
+
+    public static Party getDefaultParty() {
+        Date currentDate = getCurrentDate();
+
+        //Generate new guest that is riding the train
+        Date joelBirthday = new Date(2,30,1987);
+        String[] joelName = new String[2];
+        joelName[0] = "Joel";
+        joelName[1] = "Roberts";
+        Guest joel = new Guest(joelBirthday,joelName,true,62,159,currentDate);
+
+        //Generate another guest in the same party that is not riding the train
+        Date janeBirthday = new Date(5, 7,1995);
+        String[] janeName = new String[2];
+        janeName[0] = "Jane";
+        janeName[1] = "Roberts";
+        Guest jane = new Guest(janeBirthday,janeName,false,45,124,currentDate);
+
+        //Generate new party
+        Date dateOfAttendance = new Date(5,20,2025);
+        Party party = new Party(1,modeOfTransport.WALKING,currentDate,dateOfAttendance,"Generic Party",true,-1);
+
+        //Add joel to the party
+        party.addGuest(joel);
+        //Add jane to the party
+        party.addGuest(jane);
+        return party;
+    }
+
+    public static String sanitize(String string) {
+        return string.toLowerCase().replaceAll(" ","");
+    }
+
+    public static void displayTicketGroups(ArrayList<TicketGroup> ticketGroupsArray) {
+        if (ticketGroupsArray.isEmpty()) {
+            System.out.println("No ticket groups generated yet!");
+            return;
+        }
+        System.out.print("Ticket groups: ");
+        for (TicketGroup ticketGroup: ticketGroupsArray) {
+            System.out.print(" [tg of party: " + ticketGroup.associatedParty +"]");
+        }
+        System.out.println();
+    }
+
+    public static void displayParties(ArrayList<Party> partiesArray) {
+        if (partiesArray.isEmpty()) {
             System.out.println("No parties generated yet!");
+            return;
         }
-        for (Party party : arrayList) {
-            System.out.println(party.getPartyName());
+        System.out.print("\nParties: ");
+        for (Party party : partiesArray) {
+            System.out.print(party.getPartyName() + " ");
         }
+        System.out.println();
     }
 
     public static modeOfTransport strToMode(String input) {
@@ -52,6 +106,9 @@ public class Util {
     }
 
     public static Date getCurrentDate() {
+        if (Main.debug) {
+            System.out.println("Current date requested!");
+        }
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMddyyyy");
         LocalDateTime ldt = LocalDateTime.now();
         int dateAsNum = Integer.parseInt(dtf.format(ldt));
@@ -66,7 +123,7 @@ public class Util {
         String day = dateAsString.substring(2,4);
         String year = dateAsString.substring(4,8);
         if (Main.debug) {
-            System.out.println("Sending back date with month = " + month + ", day = " + day + ", year = " + year);
+            System.out.println("Parsing dateAsString to Date...");
         }
         return new Date(Integer.parseInt(month), Integer.parseInt(day), Integer.parseInt(year));
     }
