@@ -1,8 +1,9 @@
 package ZooLights.Objects;
 
 import ZooLights.Helpers.modeOfTransport;
-
+import static ZooLights.Main.debug;
 import java.util.Random;
+
 //TODO: Make ticket class
 
 /*
@@ -20,7 +21,7 @@ Information we need to put on ticket:
  */
 public class Ticket {
     //TODO: Derive from guest
-    Guest guest;
+    public Guest guest;
     Party party;
     String name;
     double cost;
@@ -28,7 +29,7 @@ public class Ticket {
     boolean canDrink;
     boolean canRideTrain;
     boolean isDriving;
-    int id;
+    public int id;
 
     public Ticket (Guest guest, Party party) {
         this.guest = guest;
@@ -40,6 +41,10 @@ public class Ticket {
         this.canRideTrain = guest.eligibleToRideTrain();
         this.isDriving = party.getTransportMode() == modeOfTransport.DRIVING;
         this.id = makeTicketID();
+
+        if (debug) {
+            System.out.println("Ticket of " + guest.getName() + " ID = " + id);
+        }
     }
 
     public String getTicketInfo() {

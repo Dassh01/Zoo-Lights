@@ -42,7 +42,7 @@ public class Main extends Utils {
                     System.out.print("""
                         ------------------------- Commands -------------------------
                         Functions: Generate party, End, Compile Ticket Group
-                        Viewing: List parties, Lookat : party, Lookat : ticketindex, ls
+                        Viewing: List parties, Lookat : party, Lookat : ticketindex, Lookat : ticketgroup, Lookat : ticket, ls
                         Debug: debug, Current date, gendefaultparty
                         Misc: Cmds/Help, Version
                         """ );
@@ -68,6 +68,7 @@ public class Main extends Utils {
                 case ("lookat:party"):
                     lookatParty(scanner, parties);
                     break;
+
                 case ("generatedefaultparty"):
                 case ("gendefaultparty"):
                 case ("gdp"):
@@ -98,8 +99,14 @@ public class Main extends Utils {
                         System.out.println("\n");
                     }
                     break;
-                case ("dump"):
-
+                case ("lookat:ticketgroup"):
+                case ("ls:tg"):
+                    lookatTicketGroup(scanner, ticketGroups);
+                    break;
+                case ("lookat:ticket"):
+                case ("ls:tt"):
+                    lookForTicket(scanner, ticketGroups);
+                    break;
                 default:
                     System.out.println("Command not recognized");
             }

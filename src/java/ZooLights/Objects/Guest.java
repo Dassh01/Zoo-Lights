@@ -1,18 +1,19 @@
 package ZooLights.Objects;
 
+import ZooLights.Helpers.Name;
 import ZooLights.Helpers.modeOfTransport;
 
 public class Guest {
 
     private final Date birthday;
     private final Date today;
-    private final String[] name;
+    private final Name name;
     private final boolean isRidingTrain;
     private final double height;
     private final double weight;
     private final boolean canRideTrain;
 
-    public Guest(Date birthday, String[] name, boolean isRidingTrain, double height, double weight, Date today) {
+    public Guest(Date birthday, Name name, boolean isRidingTrain, double height, double weight, Date today) {
         this.birthday = birthday;
         this.name = name;
         this.isRidingTrain = isRidingTrain;
@@ -44,11 +45,9 @@ public class Guest {
     public double getWeight() {
         return weight;
     }
+
     public String getName() {
-        //Ignore the suggestion telling you to make these variables inline!! -Bea
-        int FIRST_NAME_INDEX = 0;
-        int LAST_NAME_INDEX = 1;
-        return name[FIRST_NAME_INDEX] + " " + name[LAST_NAME_INDEX];
+        return name.getFirstname() + " " + name.getLastname();
     }
 
 }

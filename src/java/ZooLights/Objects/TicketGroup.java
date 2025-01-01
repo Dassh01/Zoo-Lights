@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class TicketGroup {
 
     private Party party;
-    private ArrayList<Ticket> tickets = new ArrayList<>();
+    public ArrayList<Ticket> tickets = new ArrayList<>();
     public String associatedParty;
 
     public TicketGroup(Party party) {
@@ -22,11 +22,8 @@ public class TicketGroup {
     }
 
     public void displayTicketsInGroup() {
-        if (party.getTransportMode() == modeOfTransport.DRIVING) {
-
-        }
         for (Ticket ticket : tickets) {
-            System.out.println();
+            System.out.println("Ticket of " + ticket.guest.getName() + " has ID = " + ticket.id);
         }
     }
 
