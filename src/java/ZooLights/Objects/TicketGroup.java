@@ -1,5 +1,7 @@
 package ZooLights.Objects;
 
+import ZooLights.Helpers.modeOfTransport;
+
 import java.util.ArrayList;
 
 public class TicketGroup {
@@ -16,6 +18,15 @@ public class TicketGroup {
     public void compileTickets() {
         for (Guest guest : party.guestList) {
             tickets.add(new Ticket(guest,party));
+        }
+    }
+
+    public void displayTicketsInGroup() {
+        if (party.getTransportMode() == modeOfTransport.DRIVING) {
+
+        }
+        for (Ticket ticket : tickets) {
+            System.out.println();
         }
     }
 

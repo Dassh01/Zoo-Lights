@@ -42,6 +42,13 @@ public class Ticket {
         this.id = makeTicketID();
     }
 
+    public String getTicketInfo() {
+        String ticketInfo = (
+                "Ticket of guest: " + name +
+                "Guest age = " + age +
+                "Guest eligibility to ride train = " + canRideTrain);
+        return ticketInfo;
+    }
 
     //TODO: Throw into Utils
     private static int makeTicketID() {

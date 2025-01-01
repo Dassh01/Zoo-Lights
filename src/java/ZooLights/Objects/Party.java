@@ -34,6 +34,7 @@ public class Party {
     public modeOfTransport getTransportMode() {
         return transportMode;
     }
+
     public void addGuest(Guest guest) {
         guestList.add(guest);
     }
@@ -78,12 +79,20 @@ public class Party {
         for (Guest guest : guestList) {
             ++i;
             Date guestBirthday = guest.getBirthday();
-            System.out.println("Info of guest " + i +
-                    "\n Guest name " + guest.getName() +
-                    "\n Guest age: " + guest.getAge() +
-                    "\n Guest birthday (mm/dd/yyyy): " + guestBirthday.getMonth() + "\\" + guestBirthday.getDay() + "\\" + guestBirthday.getYear() +
-                    "\n Guest physique: Height = " + guest.getHeight() + "\" Weight = " + guest.getWeight() + " lbs" +
-                    "\n Guest riding train = " + guest.isRidingTrain() + "\n");
+            if (guest.isRidingTrain()) {
+                System.out.println("Info of guest " + i +
+                        "\n Guest name: " + guest.getName() +
+                        "\n Guest age: " + guest.getAge() +
+                        "\n Guest birthday (mm/dd/yyyy): " + guestBirthday.getMonth() + "\\" + guestBirthday.getDay() + "\\" + guestBirthday.getYear() +
+                        "\n Guest physique: Height = " + guest.getHeight() + "\" Weight = " + guest.getWeight() + " lbs" +
+                        "\n Guest riding train = " + guest.isRidingTrain() + "\n");
+            }
+            else {
+                System.out.println("Info of guest " + i +
+                        "\n Guest name: " + guest.getName() +
+                        "\n Guest age: " + guest.getAge() +
+                        "\n Guest birthday (mm/dd/yyyy): " + guestBirthday.getMonth() + "\\" + guestBirthday.getDay() + "\\" + guestBirthday.getYear());
+            }
         }
     }
 }

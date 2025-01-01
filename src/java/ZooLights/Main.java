@@ -18,66 +18,7 @@ public class Main extends Utils {
 
     public static boolean debug;
 
-    public static Guest generateGuest(Scanner scanner, int guestIteration, Date today, modeOfTransport transportMode) {
-        //this is weird witchcraft bea cooked up, but it makes things very efficient
-        //:3c
-
-        //Name [0] = firstname
-        //Name [1] = lastname
-        String[] name = new String[2];
-        name[0] = askForThing("Enter guest " + guestIteration + "'s" + " first name: ", Scanner::nextLine, scanner);
-        name[1] = askForThing("Enter guest " + guestIteration + "'s" + " last name: ", Scanner::nextLine, scanner);
-
-        double height = 0;
-        double weight = 0;
-        boolean isRidingTrain = false;
-        if (transportMode == modeOfTransport.WALKING) { //If the guest is walking then they COULD be going on the train
-            if (userInputBoolean(askForThing("Is this guest taking the train? (Y/N): ", Scanner::nextLine, scanner))) {
-                //prompts weight and height because every
-                height = askForThing("[TRAIN] Enter guest height (Inches): ", Scanner::nextDouble, scanner);
-                weight = askForThing("[TRAIN] Enter guest weight (Pounds): ", Scanner::nextDouble, scanner);
-
-                if (weight < 300 && height > 48) {
-                    if (debug) { System.out.println(AnsiEscapeCodes.FG_RED + AnsiEscapeCodes.BG_BRIGHT_RED + "This guest passes the height and weight requirements" + AnsiEscapeCodes.RESET); }
-                    isRidingTrain = true;
-
-                } else {
-                    if (debug) { System.out.println("This guest DOES NOT pass the height and weight requirements"); }
-                }
-            }
-        }
-
-        Date birthday = strToDate(askForThing("Enter Birthday (mm/dd/yyyy): ", Scanner::nextLine, scanner));
-
-        return new Guest(birthday, name, isRidingTrain, height, weight, today);
-    }
-
-    public static Party generateParty (Scanner scanner, Date currentDate){
-        int amountOfPeopleInParty = askForThing("How many people are in the party?: ", Scanner::nextInt, scanner);
-        String partyName = askForThing("Assign a name to this party: ", Scanner::nextLine, scanner);
-        /* Prompts user for the transportation method
-        There are two options, driving and walking */
-        modeOfTransport transportMode;
-        String transportModeInputString = askForThing("""
-                    What mode of transportation is the party taking? "\
-                    Options - (Driving, Walking): \s""", Scanner::nextLine, scanner);
-
-        transportMode = strToMode(transportModeInputString);
-        //prompts and checks if the user inputs the correct discount code "MEMBER"
-        boolean hasDiscount = askForThing("Enter discount code from party: ", Scanner::nextLine, scanner).equalsIgnoreCase("MEMBER");
-        Date dateOfAttendance = strToDate(askForThing("What date does the party want to attend? (mm/dd/yyyy): ", Scanner::nextLine, scanner));
-
-        Party party = new Party(amountOfPeopleInParty, transportMode, currentDate, dateOfAttendance, partyName, hasDiscount, 1);
-        //creates a new party member for the amount that was input
-        for (int i = 1; i < amountOfPeopleInParty + 1; ++i) {
-            party.addGuest(generateGuest(scanner, i, currentDate, transportMode));
-        }
-
-        return party;
-    }
-
-    public static void runTUI (Scanner scanner, Date
-            currentDate, ArrayList < Party > parties, ArrayList < TicketGroup > tickets){
+    public static void runTUI (Scanner scanner, Date currentDate, ArrayList <Party> parties, ArrayList <TicketGroup> ticketGroups){
         //initializing variables used in the interface
         String command;
         boolean running = true;
@@ -85,7 +26,7 @@ public class Main extends Utils {
             command = askForThing("> ", Scanner::nextLine, scanner, true);
 
             /* console commands by using a switch case
-            If it matches the string in the case it is a valid command, and it will run the code */
+            If it matches the string in the case it is a valid command, and it will run the code */ //what??
             switch (sanitize(command)) {
                 case ("generateparty"):
                     parties.add(generateParty(scanner, currentDate));
@@ -125,19 +66,8 @@ public class Main extends Utils {
                     break;
 
                 case ("lookat:party"):
-                    boolean partyFound_lookat = false;
-                    String partyToLookAtCMD = askForThing("Look at which party?: ",Scanner::nextLine,scanner);
-                    for (Party party : parties) {
-                        if (sanitize(party.getPartyName()).equalsIgnoreCase(sanitize(partyToLookAtCMD))) {
-                            party.displayGuestsInParty();
-                            partyFound_lookat = true;
-                        }
-                    }
-                    if (!partyFound_lookat) {
-                        System.out.println("No party with that name was found");
-                    }
+                    lookatParty(scanner, parties);
                     break;
-
                 case ("generatedefaultparty"):
                 case ("gendefaultparty"):
                 case ("gdp"):
@@ -151,35 +81,25 @@ public class Main extends Utils {
 
                 case ("compileticketgroup"):
                 case ("ctg"):
-                    boolean partyFound_compiletix = false;
-                    String partyToCompileCMD = askForThing("Compile which party?: ",Scanner::nextLine,scanner);
-                    for (Party party : parties) {
-                        if (party.getPartyName().equalsIgnoreCase(partyToCompileCMD) && !party.compiled) {
-                            if (debug) {
-                                System.out.println("Matched party!..");
-                            }
-                            TicketGroup ticketGroup = new TicketGroup(party);
-                            tickets.add(ticketGroup);
-                            if (debug) {
-                                System.out.println("Ticket group compiled and appended to tickets.");
-                            }
-                            partyFound_compiletix = true;
-                            party.compiled = true;
-                        }
-                    }
-                    if (!partyFound_compiletix) {
-                        System.out.println("No party to compile was found");
-                    }
+                    compileTicketGroup(scanner, parties, ticketGroups);
                     break;
 
                 case ("lookat:ticketindex"):
                 case ("ls:t"):
-                    displayTicketGroups(tickets);
+                    displayTicketGroups(ticketGroups);
                     break;
                 case("ls"):
                     displayParties(parties);
-                    displayTicketGroups(tickets);
+                    displayTicketGroups(ticketGroups);
                     break;
+                case ("clear"):
+                case ("clr"):
+                    for (int i = 50; i > 0; --i) {
+                        System.out.println("\n");
+                    }
+                    break;
+                case ("dump"):
+
                 default:
                     System.out.println("Command not recognized");
             }

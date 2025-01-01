@@ -15,6 +15,8 @@ import ZooLights.Objects.Guest;
 import ZooLights.Objects.Party;
 import ZooLights.Objects.TicketGroup;
 
+import static ZooLights.Main.debug;
+
 public class Utils {
 
     public static final String dasshTag = """
@@ -30,26 +32,89 @@ public class Utils {
             https://github.com/Dassh01 : https://github.com/J-moneyKR : https://github.com/Henwy-Hi : https://github.com/Lukewtye
             """;
 
+    private static Guest generateGuest(Scanner scanner, int guestIteration, Date today, modeOfTransport transportMode, boolean isCreatingDriver) {
+        //this is weird witchcraft bea cooked up, but it makes things very efficient
+        //:3c
+
+        //Name [0] = firstname
+        //Name [1] = lastname
+        String[] name = new String[2];
+        name[0] = askForThing("Enter guest " + guestIteration + "'s" + " first name: ", Scanner::nextLine, scanner);
+        name[1] = askForThing("Enter guest " + guestIteration + "'s" + " last name: ", Scanner::nextLine, scanner);
+
+        //Below runs if guest is walking
+        double height = 0;
+        double weight = 0;
+        boolean isRidingTrain = false;
+        if (transportMode == modeOfTransport.WALKING) { //If the guest is walking then they COULD be going on the train
+            if (userInputBoolean(askForThing("Is this guest taking the train? (Y/N): ", Scanner::nextLine, scanner))) {
+                //prompts weight and height because every
+                height = askForThing("[TRAIN] Enter guest height (Inches): ", Scanner::nextDouble, scanner);
+                weight = askForThing("[TRAIN] Enter guest weight (Pounds): ", Scanner::nextDouble, scanner);
+
+                if (weight < 300 && height > 48) {
+                    if (debug) { System.out.println(AnsiEscapeCodes.FG_RED + AnsiEscapeCodes.BG_BRIGHT_RED + "This guest passes the height and weight requirements" + AnsiEscapeCodes.RESET); }
+                    isRidingTrain = true;
+
+                } else {
+                    if (debug) { System.out.println("This guest DOES NOT pass the height and weight requirements"); }
+                }
+            }
+        }
+        Date birthday = strToDate(askForThing("Enter Birthday (mm/dd/yyyy): ", Scanner::nextLine, scanner));
+        return new Guest(birthday, name, isRidingTrain, height, weight, today);
+    }
+
+    public static Party generateParty (Scanner scanner, Date currentDate){
+        int amountOfPeopleInParty = askForThing("How many people are in the party?: ", Scanner::nextInt, scanner);
+        String partyName = askForThing("Assign a name to this party: ", Scanner::nextLine, scanner);
+        /* Prompts user for the transportation method
+        There are two options, driving and walking */
+        modeOfTransport transportMode;
+        String transportModeInputString = askForThing("""
+                    What mode of transportation is the party taking? "\
+                    Options - (Driving, Walking): \s""", Scanner::nextLine, scanner);
+
+        transportMode = strToMode(transportModeInputString);
+        //prompts and checks if the user inputs the correct discount code "MEMBER"
+        boolean hasDiscount = askForThing("Enter discount code from party: ", Scanner::nextLine, scanner).equalsIgnoreCase("MEMBER");
+        Date dateOfAttendance = strToDate(askForThing("What date does the party want to attend? (mm/dd/yyyy): ", Scanner::nextLine, scanner));
+
+        Party party = new Party(amountOfPeopleInParty, transportMode, currentDate, dateOfAttendance, partyName, hasDiscount, 1);
+
+        //creates a new party member for the amount that was input
+        if (transportMode == modeOfTransport.DRIVING) {
+            party.addGuest(generateGuest(scanner,1,currentDate,transportMode,true));
+        }
+        else if (transportMode == modeOfTransport.WALKING) {
+            for (int guestIteration = 1; guestIteration < amountOfPeopleInParty + 1; ++guestIteration) {
+                party.addGuest(generateGuest(scanner, guestIteration, currentDate, transportMode, false));
+            }
+        }
+
+        return party;
+    }
+
     public static Party getDefaultParty() {
         Date currentDate = getCurrentDate();
 
         //Generate new guest that is riding the train
-        Date joelBirthday = new Date(2,30,1987);
+        Date joelBirthday = new Date(2, 30, 1987);
         String[] joelName = new String[2];
         joelName[0] = "Joel";
         joelName[1] = "Roberts";
-        Guest joel = new Guest(joelBirthday,joelName,true,62,159,currentDate);
+        Guest joel = new Guest(joelBirthday, joelName, true, 62, 159, currentDate);
 
         //Generate another guest in the same party that is not riding the train
-        Date janeBirthday = new Date(5, 7,1995);
+        Date janeBirthday = new Date(5, 7, 1995);
         String[] janeName = new String[2];
         janeName[0] = "Jane";
         janeName[1] = "Roberts";
-        Guest jane = new Guest(janeBirthday,janeName,false,45,124,currentDate);
+        Guest jane = new Guest(janeBirthday, janeName, false, 45, 124, currentDate);
 
         //Generate new party
-        Date dateOfAttendance = new Date(5,20,2025);
-        Party party = new Party(1,modeOfTransport.WALKING,currentDate,dateOfAttendance,"Generic Party",true,-1);
+        Date dateOfAttendance = new Date(5, 20, 2025);
+        Party party = new Party(1, modeOfTransport.WALKING, currentDate, dateOfAttendance, "Generic Party", true, -1);
 
         //Add joel to the party
         party.addGuest(joel);
@@ -59,7 +124,54 @@ public class Utils {
     }
 
     public static String sanitize(String string) {
-        return string.toLowerCase().replaceAll(" ","");
+        return string.toLowerCase().replaceAll(" ", "");
+    }
+
+    public static void lookatParty(Scanner scanner, ArrayList<Party> parties) {
+        String partyToLookAtCMD = askForThing("Look at which party?: ", Scanner::nextLine, scanner);
+        for (Party party : parties) {
+
+            boolean partyFound = sanitize(party.getPartyName()).equals(sanitize(partyToLookAtCMD));
+
+            if (partyFound) {
+                party.displayGuestsInParty();
+            }
+            return;
+        }
+        System.out.println("No party with that name was found");
+
+    }
+
+    public static void compileTicketGroup(Scanner scanner, ArrayList<Party> parties, ArrayList<TicketGroup> ticketGroups) {
+        String partyToCompileCMD = askForThing("Compile which party?: ", Scanner::nextLine, scanner);
+
+        for (Party party : parties) {
+
+            boolean partyFound = sanitize(party.getPartyName()).equals(sanitize(partyToCompileCMD));
+
+            if (partyFound && !party.compiled) {
+
+                if (debug) {
+                    System.out.println("Matched party!..");
+                }
+
+                //Form a ticketgroup off of party information then append it to ticketgroup arraylist
+                TicketGroup ticketGroup = new TicketGroup(party);
+                ticketGroups.add(ticketGroup);
+
+                System.out.println("Ticket group compiled and appended to tickets.");
+
+                //Tell the party internally that it is compiled (to prevent recompiling the same party accidentally)
+                party.compiled = true;
+                return;
+
+            } else if (partyFound) {
+                System.out.println("Party is already compiled!");
+                return;
+            }
+        }
+
+        System.out.println("No party with that name could be found");
     }
 
     public static void displayTicketGroups(ArrayList<TicketGroup> ticketGroupsArray) {
@@ -68,8 +180,8 @@ public class Utils {
             return;
         }
         System.out.print("Ticket groups: ");
-        for (TicketGroup ticketGroup: ticketGroupsArray) {
-            System.out.print(" [tg of party: " + ticketGroup.associatedParty +"]");
+        for (TicketGroup ticketGroup : ticketGroupsArray) {
+            System.out.print(" [tg of party: " + ticketGroup.associatedParty + "]");
         }
         System.out.println();
     }
@@ -97,6 +209,7 @@ public class Utils {
                     """);
         };
     }
+
     //TODO: Documentation
     public static boolean isWeekend(Date date) {
         final int year = date.getYear(), month = date.getMonth(), day = date.getDay();
@@ -117,11 +230,11 @@ public class Utils {
     }
 
     protected static Date strToDate(String dateAsString) {
-        dateAsString = dateAsString.replaceAll("/","");
+        dateAsString = dateAsString.replaceAll("/", "");
 
-        String month = dateAsString.substring(0,2);
-        String day = dateAsString.substring(2,4);
-        String year = dateAsString.substring(4,8);
+        String month = dateAsString.substring(0, 2);
+        String day = dateAsString.substring(2, 4);
+        String year = dateAsString.substring(4, 8);
         if (Main.debug) {
             System.out.println("Parsing dateAsString to Date...");
         }
@@ -131,9 +244,10 @@ public class Utils {
     /**
      * Comes from retyping user prompts and scanner methods over and over in APCSA projects :C
      * Used to simplify above-mentioned process, does the prompt and scan all in one (now with an embedded try catch!) (InputMismatch be gone!)
-     * @param askText [String] Prompt the user is asked in console
+     *
+     * @param askText       [String] Prompt the user is asked in console
      * @param inputFunction [Scanner] lambda method (i.e: Scanner::nextLine, Scanner::nextInt), dependent on what data type you want the function to return as its return type is generic
-     * @param scanner [Scanner] (hopefully connected to System input...)
+     * @param scanner       [Scanner] (hopefully connected to System input...)
      * @return Returns data type dependent on the scanner lambda inserted
      */
     protected static <T> T askForThing(String askText, Function<Scanner, T> inputFunction, Scanner scanner) {
@@ -158,8 +272,7 @@ public class Utils {
     protected static <T> T askForThing(String askText, Function<Scanner, T> inputFunction, Scanner scanner, boolean noNewline) {
         if (noNewline) {
             System.out.print(askText);
-        }
-        else {
+        } else {
             System.out.println(askText);
         }
         T returningInformation;
@@ -178,25 +291,15 @@ public class Utils {
         }
         return returningInformation;
     }
+
     /**
      * Interprets a string into a boolean. Worked with a (yes/no) or a (y/n) prompt, case-insensitive
+     *
      * @param userInput [String] Raw user input as answer to a prompt similar to the ones listed above
      * @return [Boolean] true IF user inputted something that looks like a yes, false if user inputted something that looks something other than a yes
      */
     protected static boolean userInputBoolean(String userInput) {
         String formattedUserInput = userInput.toLowerCase().trim();
         return formattedUserInput.equals("y") || formattedUserInput.contains("yes");
-    }
-
-    /**
-     * Interprets a string into a boolean. Worked with a (yes/no) or a (y/n) prompt, case-insensitive.
-     * The more manual/specific version that allows you to choose values that will return true
-     * @param UserInput [String] Raw user input as answer to a prompt similar to the ones listed above
-     * @param trueValues [HashSet] Values that, if user has entered the same, will make the method return true
-     * @return [Boolean] true IF user inputted something that looks like a yes by the standards of the HashSet, false if user inputted something that looks something other than a yes
-     */
-    protected static boolean userInputBoolean(String UserInput, HashSet<String> trueValues) {
-        String formattedUserInput = UserInput.toLowerCase().trim();
-        return trueValues.contains(formattedUserInput);
     }
 }
